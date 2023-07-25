@@ -9,27 +9,26 @@ on:
     branches: ["master"]
 
 jobs:
-  lint-backend:
+  lint-nodejs:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node-version: [18]
+        working-directory: [backend, frontend]
 
     defaults:
       run:
-        working-directory: backend
+        working-directory: ${{ matrix.working-directory }}
 
     steps:
-      - name: Checkout code
+      - name: Checkout code at ${{ matrix.working-directory }}
         uses: actions/checkout@v3
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -45,43 +44,7 @@ jobs:
       - name: build
         run: npm run build
 
-  lint-frontend:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [14.x, 16.x, 18.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
-    defaults:
-      run:
-        working-directory: backend
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Prettier
-        continue-on-error: true
-        run: npx prettier --check .
-
-      - name: ESLint
-        continue-on-error: true
-        run: npx eslint .
-
-      - name: build
-        run: npm run build
-
-  lint_entrypoint:
+  lint-entrypoint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
