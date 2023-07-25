@@ -1,6 +1,6 @@
-import Prisma from "@prisma/client";
+import Prisma from '@prisma/client';
 
 export class Counter implements Prisma.Counter {
-    id: number;
-    createdAt: Date;
+  id: number;
+  createdAt: Date;
 }

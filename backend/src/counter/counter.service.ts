@@ -4,7 +4,7 @@ import { Counter } from './counter.dto';
 
 @Injectable()
 export class CounterService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async get() {
     return await this.prisma.counter.count();

@@ -9,9 +9,11 @@ export class PekApi {
     this.counter = new CounterApi(config);
   }
 
-  ping = () => this.root.appControllerPing();
-  incrementCounter = () => this.counter.counterControllerIncrement();
-  getCounter = () => this.counter.counterControllerGet();
+  ping = async () => await this.root.appControllerPing();
+  incrementCounter = async () =>
+    await this.counter.counterControllerIncrement();
+
+  getCounter = async () => await this.counter.counterControllerGet();
 }
 
 const basePath = window.location.origin.startsWith("http://localhost")
