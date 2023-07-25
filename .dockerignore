@@ -1,0 +1,24 @@
+**/docker-compose.yaml
+
+# OpenAPI generated
+frontend/src/api/
+
+**/.vscode/
+
+# Node.js
+**/node_modules/
+**/dist
+**/build
+**/npm-debug.log
+**/.coverage
+**/.coverage.*
+**/.env
+**/.aws
+.git
+
+# Python
+**/__pycache__/
+**/.pytest_cache/
+**/.mypy_cache/
+**/venv/
+**/.venv/

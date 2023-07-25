@@ -27,12 +27,10 @@ You can find the previous version called next [here](https://github.com/kir-dev/
 - [About](#about)
 - [Getting Started](#getting_started)
 - [Deployment](#deployment)
+- [Tests](#tests)
 - [Usage](#usage)
 - [Built Using](#built_using)
-- [TODO](../TODO.md)
-- [Contributing](../CONTRIBUTING.md)
 - [Authors](#authors)
-- [Acknowledgments](#acknowledgement)
 
 ## 🧐 About <a name = "about"></a>
 
@@ -44,29 +42,93 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-What things you need to install the software and how to install them.
+- Node
+- Postgres
+- python3 (development only)
+- java (development only)
 
-```
-Give examples
-```
+or
 
-### Installing
+- Docker
+- Docker Compose (optional)
 
-A step by step series of examples that tell you how to get a development env running.
+### Installing with docker
 
-Say what the step will be
-
-```
-Give the example
-```
-
-And repeat
-
-```
-until finished
+```bash
+docker build -t pek-fresh .
 ```
 
-End with an example of getting some data out of the system or using it for a little demo.
+### Installing with docker-compose
+
+```bash
+docker-compose build
+```
+
+### Installing with entrypoint.py
+
+```bash
+python3 entrypoint.py build metal --install --no-validate
+```
+
+### Installing manually (not recommended)
+
+```bash
+cd backend
+npm ci
+npm run build
+
+# you can find the whole command in entrypoint.py
+npx @openapitools/openapi-generator-cli generate ...
+
+cd ../frontend
+npm ci
+npm run build
+```
+
+## 🚀 Deployment <a name = "deployment"></a>
+
+### Using docker-compose (recommended)
+
+1. copy `.env.example` to `.env`
+2. verify that `POSTGRES_HOST` is correct at both places
+
+```bash
+docker-compose up -d
+```
+
+### Using docker
+
+1. copy `.env.example` to `.env`
+2. verify that `POSTGRES_HOST` is correct at both places
+
+#### start a postgres server
+
+```bash
+docker run -d -p 5432:5432 --env-file=./.env postgres
+```
+
+#### start the webserver
+
+```bash
+docker run -d -p 4000:4000 --env-file=./.env pek-fresh
+```
+
+### In development mode
+
+1. copy `.env.example` to `.env`
+2. verify that `POSTGRES_HOST` is `localhost` at both places
+
+#### Start the server
+
+This will install the dependencies using `npm` and start a development server.
+
+```bash
+docker run -d -p 5432:5432 --env-file=./.env --name pek-fresh-db postgres
+python3 ./entrypoint.py shell --cwd backend 'npm run migrate:dev -- --skip-generate'
+python3 ./entrypoint.py dev --init
+```
+
+For more information run `python3 ./entrypoint.py dev --help`
 
 ## 🔧 Running the tests <a name = "tests"></a>
 
@@ -92,25 +154,13 @@ Give an example
 
 Add notes about how to use the system.
 
-## 🚀 Deployment <a name = "deployment"></a>
-
-Add additional notes about how to deploy this on a live system.
 
 ## ⛏️ Built Using <a name = "built_using"></a>
 
-- [MongoDB](https://www.mongodb.com/) - Database
-- [Express](https://expressjs.com/) - Server Framework
-- [VueJs](https://vuejs.org/) - Web Framework
 - [NodeJs](https://nodejs.org/en/) - Server Environment
 
 ## ✍️ Authors <a name = "authors"></a>
 
-- [@kylelobo](https://github.com/kylelobo) - Idea & Initial work
+- [Tamás Südi](https://github.com/tomitheninja) - starter template
 
-See also the list of [contributors](https://github.com/kylelobo/The-Documentation-Compendium/contributors) who participated in this project.
-
-## 🎉 Acknowledgements <a name = "acknowledgement"></a>
-
-- Hat tip to anyone whose code was used
-- Inspiration
-- References
+<!-- See also the list of [contributors](https://github.com/kylelobo/The-Documentation-Compendium/contributors) who participated in this project. -->

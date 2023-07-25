@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    env_file:
+      - .env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432
+
+  db_migration:
+    build: .
+    depends_on:
+      - db
+    env_file:
+      - .env
+    command: bash -c "npx prisma migrate deploy"
+
+  web:
+    build: .
+    depends_on:
+      db_migration:
+        condition: service_completed_successfully
+    env_file:
+      - .env
+    ports:
+      - 4000:4000
+
+volumes:
+  postgres-data:
