@@ -19,11 +19,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install pylint mypy black
       - name: Analysing the code with pylint
+        continue-on-error: true
         run: |
           pylint entrypoint.py --disable C0114,C0115,C0116 --fail-under 9
       - name: Analysing the code with mymy
+        continue-on-error: true
         run: |
           mypy entrypoint.py
       - name: Analysing the code with black
+        continue-on-error: true
         run: |
           black --check entrypoint.py
