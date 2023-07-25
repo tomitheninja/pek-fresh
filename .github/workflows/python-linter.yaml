@@ -1,0 +1,34 @@
+name: Python CI
+
+on:
+  push:
+    paths:
+      - entrypoint.py
+      - requirements.txt
+
+jobs:
+  lint-entrypoint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Analysing the code with pylint
+        if: always()
+        run: pylint entrypoint.py --disable C0114,C0115,C0116 --fail-under 9
+
+      - name: Analysing the code with mymy
+        if: always()
+        run: mypy entrypoint.py
+
+      - name: Analysing the code with black
+        if: always()
+        run: black --check entrypoint.py
