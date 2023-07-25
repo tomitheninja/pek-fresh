@@ -9,7 +9,7 @@ WORKDIR /app
 
 # Build using the entrypoint
 COPY ./ ./
-RUN ./entrypoint.py build metal --install
+RUN ./entrypoint.py build --install
 
 # Prune the dev dependencies
 RUN cd ./backend && npm prune --omit=dev

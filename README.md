@@ -67,7 +67,7 @@ docker-compose build
 ### Installing with entrypoint.py
 
 ```bash
-python3 entrypoint.py build metal --install --no-validate
+python3 entrypoint.py build --install --no-validate
 ```
 
 ### Installing manually (not recommended)

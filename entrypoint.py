@@ -9,8 +9,8 @@ import time
 
 
 def load_env() -> None:
-    with open(".env", "r") as f:
-        for line in f:
+    with open(".env", "r", encoding="utf-8") as file:
+        for line in file:
             line = line.strip()
             if line and not line.startswith("#"):
                 key, value = line.split("=", 1)
@@ -29,17 +29,16 @@ try:
 except FileNotFoundError:
     print("No .env file found, skipping loading env variables")
 
+GENERATE_CLIENT_API_COMMAND = """\
+npx @openapitools/openapi-generator-cli generate \
+-i ./openapi.json \
+-g typescript-fetch \
+-o ../frontend/src/pek-api \
+--additional-properties=supportsES6=true
+"""
 
-def build_metal_command(
-    install=False, items=["backend", "frontend", "openapi"], validate=True
-):
-    GENERATE_CLIENT_API_COMMAND = """\
-    npx @openapitools/openapi-generator-cli generate \
-    -i ./openapi.json \
-    -g typescript-fetch \
-    -o ../frontend/src/pek-api \
-    --additional-properties=supportsES6=true
-    """
+
+def build_metal_command(items: list[str], install=False, validate=True):
     if "backend" in items or "openapi" in items:
         if install:
             execute_command("npm ci", cwd="backend")
@@ -60,7 +59,7 @@ def build_metal_command(
         execute_command("npm run build", cwd="frontend")
 
 
-def start_dev_command(do_init=False, items=["backend", "frontend", "openapi"]):
+def start_dev_command(items: list[str], do_init=False):
     if do_init:
         execute_command("npm install", cwd="backend")
         execute_command("npm install", cwd="frontend")
@@ -82,11 +81,12 @@ def start_dev_command(do_init=False, items=["backend", "frontend", "openapi"]):
             lambda: execute_command("npm run start", cwd="frontend", verbose=True)
         )
     if "openapi" in items:
+
         def watch_and_build():
             last_config = ""
             while True:
-                with open("backend/openapi.json", "r") as f:
-                    if (the_config := f.read()) != last_config:
+                with open("backend/openapi.json", "r", encoding="utf-8") as file:
+                    if (the_config := file.read()) != last_config:
                         last_config = the_config
                         try:
                             build_metal_command(
@@ -94,8 +94,8 @@ def start_dev_command(do_init=False, items=["backend", "frontend", "openapi"]):
                                 validate=False,
                                 items=["openapi"],
                             )
-                        except Exception as e:
-                            print(e)
+                        except Exception as err:
+                            print(err)
                 time.sleep(1)
 
         threading.Thread(target=watch_and_build, daemon=True).start()
@@ -104,11 +104,11 @@ def start_dev_command(do_init=False, items=["backend", "frontend", "openapi"]):
         concurrent.futures.wait(futures)
 
 
+# pylint: disable=R0903
 class Commands:
     SHELL = "shell"
     DEV = "dev"
     BUILD = "build"
-    DOCKER = "docker"
     METAL = "metal"
 
 
@@ -119,7 +119,9 @@ def main() -> None:
     # dev subcommand
     dev = subparsers.add_parser(Commands.DEV)
     dev.add_argument(
-        "--init", action="store_true", help="install dependencies, build the project and apply migrations"
+        "--init",
+        action="store_true",
+        help="install dependencies, build the project and apply migrations",
     )
     dev.add_argument(
         "--items",
@@ -135,17 +137,14 @@ def main() -> None:
 
     # build subcommand
     build = subparsers.add_parser(Commands.BUILD)
-    build_subparsers = build.add_subparsers(dest="executor", required=True)
-    docker = build_subparsers.add_parser(Commands.DOCKER)
-    metal = build_subparsers.add_parser(Commands.METAL)
-    metal.add_argument("--install", action="store_true", help="Install dependencies")
-    metal.add_argument(
+    build.add_argument("--install", action="store_true", help="Install dependencies")
+    build.add_argument(
         "--no-validate",
         action="store_false",
         dest="validate",
         help="Don't validate the openapi spec",
     )
-    metal.add_argument(
+    build.add_argument(
         "--items",
         nargs="+",
         choices=["frontend", "backend", "openapi"],
@@ -161,13 +160,9 @@ def main() -> None:
         case Commands.DEV:
             start_dev_command(do_init=args.init, items=args.items)
         case Commands.BUILD:
-            match args.executor:
-                case Commands.DOCKER:
-                    execute_command("docker build . -t pek-fresh")
-                case Commands.METAL:
-                    build_metal_command(
-                        install=args.install, validate=args.validate, items=args.items
-                    )
+            build_metal_command(
+                install=args.install, validate=args.validate, items=args.items
+            )
 
 
 def execute_command(command: str, cwd="", verbose: bool | str = False):
@@ -205,7 +200,9 @@ def execute_command(command: str, cwd="", verbose: bool | str = False):
 
         if process.poll() is not None:
             if process.returncode != 0:
-                raise Exception(f"Command failed with exit code {process.returncode}")
+                raise RuntimeError(
+                    f"Command failed with exit code {process.returncode}"
+                )
             return
 
 
