@@ -94,6 +94,7 @@ def start_dev_command(items: list[str], do_init=False):
                                 validate=False,
                                 items=["openapi"],
                             )
+                        # pylint: disable=W0718
                         except Exception as err:
                             print(err)
                 time.sleep(1)

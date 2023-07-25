@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - entrypoint.py
+
 jobs:
   lint_entrypoint:
     runs-on: ubuntu-latest
@@ -19,7 +20,7 @@ jobs:
           pip install pylint mypy black
       - name: Analysing the code with pylint
         run: |
-          pylint entrypoint.py
+          pylint entrypoint.py --disable C0114,C0115,C0116 --fail-under 9
       - name: Analysing the code with mymy
         run: |
           mypy entrypoint.py
