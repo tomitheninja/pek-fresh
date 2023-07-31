@@ -6,6 +6,7 @@ import { join } from 'path';
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 
 export const VALIDATE_ONLY = process.argv.includes('--validate-only');
+const openAPILogger = new Logger('OpenAPI');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -44,7 +45,7 @@ async function bootstrap() {
 
   // start server
   if (VALIDATE_ONLY) {
-    Logger.log('Validation successful');
+    openAPILogger.log('Validation successful');
     await app.close();
     process.exit(0);
   }
@@ -66,7 +67,7 @@ function generateOpenAPIConfig(config: OpenAPIObject) {
   const oldConfig = readFileSync(configPath, 'utf-8');
 
   if (deepEqual(JSON.parse(oldConfig), config)) {
-    Logger.log('OpenAPI config file is up to date');
+    openAPILogger.log('config file is up to date');
     return false;
   }
 
