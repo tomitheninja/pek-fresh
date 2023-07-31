@@ -7,13 +7,13 @@ import sys
 import threading
 import time
 import shutil
+from typing import NoReturn
 
 if sys.version_info < (3, 10):
     print("Python 3.10 or newer is required")
     sys.exit(1)
 
-
-def load_env() -> None:
+try:
     with open(".env", "r", encoding="utf-8") as file:
         for line in file:
             line = line.strip()
@@ -27,69 +27,93 @@ def load_env() -> None:
                 ):
                     value = value[1:-1]
                 os.environ[key] = value
-
-
-try:
-    load_env()
 except FileNotFoundError:
-    print("No .env file found, skipping loading env variables")
+    print("No .env file found")
 
-GENERATE_CLIENT_API_COMMAND = """\
+
+class ActionsAdapter:
+    @staticmethod
+    def backend_install_dependencies():
+        execute_command("npm ci", cwd="backend", verbose=True)
+
+    @staticmethod
+    def backend_run_build():
+        execute_command("npm run build", cwd="backend", verbose=True)
+
+    @staticmethod
+    def backend_start_dev():
+        execute_command("npm run start:dev-cli", cwd="backend", verbose=True)
+
+    @staticmethod
+    def frontend_start_dev():
+        execute_command("npm run start", cwd="frontend", verbose=True)
+
+    @staticmethod
+    def frontend_run_build():
+        execute_command("npm run build", cwd="frontend", verbose=True)
+
+    @staticmethod
+    def migrate_database():
+        execute_command("npm run migrate:dev", cwd="backend", verbose=True)
+
+    @staticmethod
+    def frontend_install_dependencies():
+        execute_command("npm ci", cwd="frontend", verbose=True)
+
+    @staticmethod
+    def openapi_pek_validate_backend():
+        execute_command(
+            "npm run start:prod -- --validate-only", cwd="backend", verbose=True
+        )
+
+    @staticmethod
+    def openapi_pek_generate_client_api():
+        execute_command(
+            """\
 npx @openapitools/openapi-generator-cli generate \
 -i ./openapi.json \
 -g typescript-fetch \
 -o ../frontend/src/generated/pek-api \
---additional-properties=supportsES6=true
-"""
+--additional-properties=supportsES6=true""",
+            cwd="backend",
+            verbose=True,
+        )
 
 
 def build_metal_command(items: list[str], install=False, validate=True):
     if "backend" in items or "openapi" in items:
         if install:
-            execute_command("npm ci", cwd="backend")
-
+            ActionsAdapter.backend_install_dependencies()
         if "backend" in items:
-            execute_command("npm run build", cwd="backend")
+            ActionsAdapter.backend_run_build()
         if "openapi" in items:
             if validate:
-                execute_command("npm run start:prod -- --validate-only", cwd="backend")
-            execute_command(
-                GENERATE_CLIENT_API_COMMAND,
-                cwd="backend",
-            )
+                ActionsAdapter.openapi_pek_validate_backend()
+            ActionsAdapter.openapi_pek_generate_client_api()
     if "frontend" in items:
         if install:
-            execute_command("npm ci", cwd="frontend")
-
-        execute_command("npm run build", cwd="frontend")
+            ActionsAdapter.frontend_install_dependencies()
+        ActionsAdapter.frontend_run_build()
 
 
 def start_dev_command(items: list[str], do_init=False):
     if do_init:
-        execute_command("npm install", cwd="backend")
-        execute_command("npm install", cwd="frontend")
-
         build_metal_command(
-            install=False,
+            install=True,
             items=[
                 item for item in items if item in ["backend", "frontend", "openapi"]
             ],
         )
+        ActionsAdapter.migrate_database()
 
     commands = []
     if "backend" in items:
-        commands.append(
-            lambda: execute_command(
-                "npm run start:dev-cli", cwd="backend", verbose=True
-            )
-        )
+        commands.append(ActionsAdapter.backend_start_dev)
     if "frontend" in items:
-        commands.append(
-            lambda: execute_command("npm run start", cwd="frontend", verbose=True)
-        )
+        commands.append(ActionsAdapter.frontend_start_dev)
     if "openapi" in items:
 
-        def watch_and_build():
+        def watch_and_build_daemon() -> NoReturn:
             last_config = ""
             while True:
                 with open("backend/openapi.json", "r", encoding="utf-8") as file:
@@ -106,7 +130,7 @@ def start_dev_command(items: list[str], do_init=False):
                             print(err)
                 time.sleep(1)
 
-        threading.Thread(target=watch_and_build, daemon=True).start()
+        threading.Thread(target=watch_and_build_daemon, daemon=True).start()
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(task) for task in commands]
         concurrent.futures.wait(futures)
@@ -114,6 +138,7 @@ def start_dev_command(items: list[str], do_init=False):
 
 def start_clean_command():
     def clean_folder(root: str):
+        print(f"Cleaning {root}")
         if not os.path.exists(root):
             return
         for filename in os.listdir(root):
@@ -208,18 +233,15 @@ def execute_command(command: str, cwd="", verbose: bool | str = False):
         universal_newlines=True,
     )
 
+    tag = ""
     if verbose is True:
         tag = cwd + "$ "
-    elif verbose is False:
-        tag = "\t"
-    elif verbose is None:
-        tag = ""
-    else:
+    elif verbose is not False:
         tag = verbose + "$ "
 
     def copy_stream(in_stream, out_stream):
-        for line in iter(in_stream.readline, b""):
-            line = line.replace("\033[2J", "").strip()
+        for raw_line in iter(in_stream.readline, b""):
+            line = raw_line.replace("\033[2J", "").strip()
             if line == "":
                 continue
             out_stream.write(tag)

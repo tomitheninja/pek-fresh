@@ -89,8 +89,6 @@ npm run build
 
 ```bash
 docker run -d -p 5432:5432 --env-file=./.env --name pek-fresh-db postgres
-python3 entrypoint.py build --install
-python3 ./entrypoint.py shell --cwd backend 'npm run migrate:dev -- --skip-generate'
 python3 ./entrypoint.py dev --init
 ```
 
