@@ -31,7 +31,7 @@ export class CounterApi extends runtime.BaseAPI {
      * get the current value of the counter
      * 
      */
-    async counterControllerGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<number>> {
+    async counterControllerGetCountRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<number>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -54,8 +54,8 @@ export class CounterApi extends runtime.BaseAPI {
      * get the current value of the counter
      * 
      */
-    async counterControllerGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<number> {
-        const response = await this.counterControllerGetRaw(initOverrides);
+    async counterControllerGetCount(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<number> {
+        const response = await this.counterControllerGetCountRaw(initOverrides);
         return await response.value();
     }
 

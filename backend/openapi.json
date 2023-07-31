@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/api/v1": {
+    "/api/v1/ping": {
       "get": {
         "operationId": "AppController_ping",
         "parameters": [],
@@ -68,7 +68,7 @@
     },
     "/api/v1/counter/count": {
       "get": {
-        "operationId": "CounterController_get",
+        "operationId": "CounterController_getCount",
         "summary": "",
         "description": "get the current value of the counter",
         "parameters": [],

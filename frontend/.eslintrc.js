@@ -30,6 +30,6 @@ module.exports = {
     "**/node_modules/*",
     "**/build/*",
     "**/dist/*",
-    // "**/pek-api/*",
+    "**/generated/*",
   ],
 };

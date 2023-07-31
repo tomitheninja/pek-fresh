@@ -1,4 +1,4 @@
-import { Configuration, DefaultApi, CounterApi } from "./pek-api";
+import { Configuration, DefaultApi, CounterApi } from "./generated/pek-api";
 
 export class PekApi {
   private readonly root: DefaultApi;
@@ -13,7 +13,7 @@ export class PekApi {
   incrementCounter = async () =>
     await this.counter.counterControllerIncrement();
 
-  getCounter = async () => await this.counter.counterControllerGet();
+  getCounter = async () => await this.counter.counterControllerGetCount();
 }
 
 const basePath = window.location.origin.startsWith("http://localhost")

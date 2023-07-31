@@ -28,7 +28,7 @@ export class DefaultApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/api/v1`,
+            path: `/api/v1/ping`,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,

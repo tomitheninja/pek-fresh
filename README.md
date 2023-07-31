@@ -26,6 +26,7 @@ You can find the previous version called next [here](https://github.com/kir-dev/
 
 - [About](#about)
 - [Getting Started](#getting_started)
+- [Development](#development)
 - [Deployment](#deployment)
 - [Tests](#tests)
 - [Usage](#usage)
@@ -38,13 +39,15 @@ Write about 1-2 paragraphs describing the purpose of your project.
 
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
+```bash
+git clone <location of repository>
+```
 
 ### Prerequisites
 
 - Node
 - Postgres
-- python3 (development only)
+- python >= 3.10 (development only)
 - java (development only)
 
 or
@@ -58,16 +61,10 @@ or
 docker build -t pek-fresh .
 ```
 
-### Installing with docker-compose
-
-```bash
-docker-compose build
-```
-
 ### Installing with entrypoint.py
 
 ```bash
-python3 entrypoint.py build --install --no-validate
+python3 entrypoint.py build --install
 ```
 
 ### Installing manually (not recommended)
@@ -84,6 +81,20 @@ cd ../frontend
 npm ci
 npm run build
 ```
+
+## 🏗️ Development <a name = "development"></a>
+
+1. copy `.env.example` to `.env`
+2. set `POSTGRES_HOST` to `localhost` at both places
+
+```bash
+docker run -d -p 5432:5432 --env-file=./.env --name pek-fresh-db postgres
+python3 entrypoint.py build --install
+python3 ./entrypoint.py shell --cwd backend 'npm run migrate:dev -- --skip-generate'
+python3 ./entrypoint.py dev --init
+```
+
+For more information run `python3 ./entrypoint.py dev --help`
 
 ## 🚀 Deployment <a name = "deployment"></a>
 
@@ -112,23 +123,6 @@ docker run -d -p 5432:5432 --env-file=./.env postgres
 ```bash
 docker run -d -p 4000:4000 --env-file=./.env pek-fresh
 ```
-
-### In development mode
-
-1. copy `.env.example` to `.env`
-2. verify that `POSTGRES_HOST` is `localhost` at both places
-
-#### Start the server
-
-This will install the dependencies using `npm` and start a development server.
-
-```bash
-docker run -d -p 5432:5432 --env-file=./.env --name pek-fresh-db postgres
-python3 ./entrypoint.py shell --cwd backend 'npm run migrate:dev -- --skip-generate'
-python3 ./entrypoint.py dev --init
-```
-
-For more information run `python3 ./entrypoint.py dev --help`
 
 ## 🔧 Running the tests <a name = "tests"></a>
 

@@ -6,9 +6,10 @@ import concurrent.futures
 import sys
 import threading
 import time
+import shutil
 
-if sys.version_info < (3, 9):
-    print("Python 3.9 or newer is required")
+if sys.version_info < (3, 10):
+    print("Python 3.10 or newer is required")
     sys.exit(1)
 
 
@@ -37,7 +38,7 @@ GENERATE_CLIENT_API_COMMAND = """\
 npx @openapitools/openapi-generator-cli generate \
 -i ./openapi.json \
 -g typescript-fetch \
--o ../frontend/src/pek-api \
+-o ../frontend/src/generated/pek-api \
 --additional-properties=supportsES6=true
 """
 
@@ -78,7 +79,7 @@ def start_dev_command(items: list[str], do_init=False):
     commands = []
     if "backend" in items:
         commands.append(
-            lambda: execute_command("npm run start:dev", cwd="backend", verbose=True)
+            lambda: execute_command("npm run start:dev-cli", cwd="backend", verbose=True)
         )
     if "frontend" in items:
         commands.append(
@@ -109,12 +110,30 @@ def start_dev_command(items: list[str], do_init=False):
         concurrent.futures.wait(futures)
 
 
+def start_clean_command():
+    def clean_folder(root: str):
+        if not os.path.exists(root):
+            return
+        for filename in os.listdir(root):
+            file_path = os.path.join(root, filename)
+            if os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+            elif filename != ".gitkeep":
+                os.unlink(file_path)
+    clean_folder("backend/node_modules")
+    clean_folder("frontend/node_modules")
+    clean_folder("frontend/build")
+    clean_folder("frontend/src/generated")
+    clean_folder("backend/dist")
+
+
 # pylint: disable=R0903
 class Commands:
     SHELL = "shell"
     DEV = "dev"
     BUILD = "build"
     METAL = "metal"
+    CLEAN = "clean"
 
 
 def main() -> None:
@@ -156,6 +175,9 @@ def main() -> None:
         default=["frontend", "backend", "openapi"],
     )
 
+    # clean subcommand
+    subparsers.add_parser(Commands.CLEAN)
+
     args = parser.parse_args()
     print(args)
 
@@ -168,6 +190,8 @@ def main() -> None:
             build_metal_command(
                 install=args.install, validate=args.validate, items=args.items
             )
+        case Commands.CLEAN:
+            start_clean_command()
 
 
 def execute_command(command: str, cwd="", verbose: bool | str = False):
@@ -190,18 +214,21 @@ def execute_command(command: str, cwd="", verbose: bool | str = False):
     else:
         tag = verbose + "$ "
 
-    while True:
-        if stdout_line := process.stdout.readline() if process.stdout else "":
-            sys.stdout.write(tag)
-            sys.stdout.write(stdout_line if "\033[2J" not in stdout_line else "")
-            sys.stdout.flush()
-            continue
+    def copy_stream(in_stream, out_stream):
+        for line in iter(in_stream.readline, b''):
+            line = line.replace("\033[2J", "").strip()
+            if line == "":
+                continue
+            out_stream.write(tag)
+            out_stream.write(line)
+            out_stream.write("\n")
+            out_stream.flush()
 
-        if stderr_line := process.stderr.readline() if process.stderr else "":
-            sys.stderr.write(tag)
-            sys.stderr.write(stderr_line if "\033[2J" not in stderr_line else "")
-            sys.stderr.flush()
-            continue
+    threading.Thread(target=copy_stream, args=(process.stdout, sys.stdout), daemon=True).start()
+    threading.Thread(target=copy_stream, args=(process.stderr, sys.stderr), daemon=True).start()
+
+
+    while True:
 
         if process.poll() is not None:
             if process.returncode != 0:

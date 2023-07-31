@@ -16,7 +16,7 @@ export class CounterController {
 
   /* get the current value of the counter */
   @Get('count')
-  async get(): Promise<number> {
+  async getCount(): Promise<number> {
     return this.counterService.get();
   }
 

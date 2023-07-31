@@ -22,10 +22,11 @@ async function bootstrap() {
     }),
   );
 
-  process.env.NODE_ENV !== 'production' &&
+  if (process.env.NODE_ENV !== 'production') {
     app.enableCors({
       origin: 'http://localhost:3000',
     });
+  }
 
   // * using prefix api without versioning will conflict with swagger ui
   app.setGlobalPrefix('api');
