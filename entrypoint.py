@@ -79,7 +79,9 @@ def start_dev_command(items: list[str], do_init=False):
     commands = []
     if "backend" in items:
         commands.append(
-            lambda: execute_command("npm run start:dev-cli", cwd="backend", verbose=True)
+            lambda: execute_command(
+                "npm run start:dev-cli", cwd="backend", verbose=True
+            )
         )
     if "frontend" in items:
         commands.append(
@@ -120,6 +122,7 @@ def start_clean_command():
                 shutil.rmtree(file_path)
             elif filename != ".gitkeep":
                 os.unlink(file_path)
+
     clean_folder("backend/node_modules")
     clean_folder("frontend/node_modules")
     clean_folder("frontend/build")
@@ -215,7 +218,7 @@ def execute_command(command: str, cwd="", verbose: bool | str = False):
         tag = verbose + "$ "
 
     def copy_stream(in_stream, out_stream):
-        for line in iter(in_stream.readline, b''):
+        for line in iter(in_stream.readline, b""):
             line = line.replace("\033[2J", "").strip()
             if line == "":
                 continue
@@ -224,12 +227,14 @@ def execute_command(command: str, cwd="", verbose: bool | str = False):
             out_stream.write("\n")
             out_stream.flush()
 
-    threading.Thread(target=copy_stream, args=(process.stdout, sys.stdout), daemon=True).start()
-    threading.Thread(target=copy_stream, args=(process.stderr, sys.stderr), daemon=True).start()
-
+    threading.Thread(
+        target=copy_stream, args=(process.stdout, sys.stdout), daemon=True
+    ).start()
+    threading.Thread(
+        target=copy_stream, args=(process.stderr, sys.stderr), daemon=True
+    ).start()
 
     while True:
-
         if process.poll() is not None:
             if process.returncode != 0:
                 raise RuntimeError(
