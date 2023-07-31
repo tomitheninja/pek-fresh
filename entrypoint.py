@@ -7,6 +7,10 @@ import sys
 import threading
 import time
 
+if sys.version_info < (3, 9):
+    print("Python 3.9 or newer is required")
+    sys.exit(1)
+
 
 def load_env() -> None:
     with open(".env", "r", encoding="utf-8") as file:
