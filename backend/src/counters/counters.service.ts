@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
-import { Counter } from './counter.dto';
+import { Counter } from './counters.dto';
 
 @Injectable()
-export class CounterService {
+export class CountersService {
   constructor(private prisma: PrismaService) {}
 
   async get() {

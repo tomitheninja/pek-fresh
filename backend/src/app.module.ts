@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { CounterModule } from './counter/counter.module';
+import { CountersModule } from './counters/counters.module';
 import { PrismaModule } from 'nestjs-prisma';
 
 @Module({
@@ -14,7 +14,7 @@ import { PrismaModule } from 'nestjs-prisma';
         return [{ rootPath }];
       },
     }),
-    CounterModule,
+    CountersModule,
   ],
   controllers: [AppController],
   providers: [],

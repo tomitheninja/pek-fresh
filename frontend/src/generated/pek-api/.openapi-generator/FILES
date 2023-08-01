@@ -1,4 +1,4 @@
-apis/CounterApi.ts
+apis/CountersApi.ts
 apis/DefaultApi.ts
 apis/index.ts
 index.ts

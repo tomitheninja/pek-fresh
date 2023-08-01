@@ -19,9 +19,9 @@
         }
       }
     },
-    "/api/v1/counter": {
+    "/api/v1/counters": {
       "post": {
-        "operationId": "CounterController_increment",
+        "operationId": "CountersController_increment",
         "summary": "",
         "description": "increment the counter and return the new value",
         "parameters": [],
@@ -38,11 +38,11 @@
           }
         },
         "tags": [
-          "counter"
+          "counters"
         ]
       },
       "get": {
-        "operationId": "CounterController_list",
+        "operationId": "CountersController_list",
         "summary": "",
         "description": "a list each increments",
         "parameters": [],
@@ -62,13 +62,13 @@
           }
         },
         "tags": [
-          "counter"
+          "counters"
         ]
       }
     },
-    "/api/v1/counter/count": {
+    "/api/v1/counters/count": {
       "get": {
-        "operationId": "CounterController_getCount",
+        "operationId": "CountersController_getCount",
         "summary": "",
         "description": "get the current value of the counter",
         "parameters": [],
@@ -85,7 +85,7 @@
           }
         },
         "tags": [
-          "counter"
+          "counters"
         ]
       }
     }

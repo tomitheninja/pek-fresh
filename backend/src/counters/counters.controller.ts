@@ -1,28 +1,28 @@
 import { Controller, Get, Post } from '@nestjs/common';
-import { CounterService } from './counter.service';
+import { CountersService } from './counters.service';
 import { ApiTags } from '@nestjs/swagger';
-import { Counter } from './counter.dto';
+import { Counter } from './counters.dto';
 
-@ApiTags('counter')
-@Controller('counter')
-export class CounterController {
-  constructor(private readonly counterService: CounterService) {}
+@ApiTags('counters')
+@Controller('counters')
+export class CountersController {
+  constructor(private readonly countersService: CountersService) {}
 
   /* increment the counter and return the new value */
   @Post()
   async increment(): Promise<number> {
-    return this.counterService.increment();
+    return this.countersService.increment();
   }
 
   /* get the current value of the counter */
   @Get('count')
   async getCount(): Promise<number> {
-    return this.counterService.get();
+    return this.countersService.get();
   }
 
   /* a list each increments */
   @Get()
   async list(): Promise<Counter[]> {
-    return this.counterService.list();
+    return this.countersService.list();
   }
 }
