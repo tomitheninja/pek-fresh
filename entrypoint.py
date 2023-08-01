@@ -100,6 +100,7 @@ def start_dev_command(items: list[str], do_init=False):
     if do_init:
         build_metal_command(
             install=True,
+            validate=False,
             items=[
                 item for item in items if item in ["backend", "frontend", "openapi"]
             ],
